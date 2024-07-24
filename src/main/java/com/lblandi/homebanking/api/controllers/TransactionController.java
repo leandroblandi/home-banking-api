@@ -18,6 +18,7 @@ import com.lblandi.homebanking.api.dtos.TransactionDto;
 import com.lblandi.homebanking.api.entities.Account;
 import com.lblandi.homebanking.api.entities.Transaction;
 import com.lblandi.homebanking.api.services.IAccountService;
+import com.lblandi.homebanking.api.services.ITransactionService;
 
 import jakarta.validation.Valid;
 
@@ -30,11 +31,14 @@ public class TransactionController {
 	private IAccountService accountService;
 
 	@Autowired
+	private ITransactionService transactionService;
+
+	@Autowired
 	private TransactionConverter transactionConverter;
 
 	@GetMapping("/v1/accounts/{uuid}/transactions")
 	public ResponseEntity<Set<TransactionDto>> getTransactions(@PathVariable String uuid) {
-		Set<Transaction> transactions = accountService.getTransactions(uuid);
+		Set<Transaction> transactions = transactionService.getTransactions(uuid);
 		return ResponseEntity.ok(transactionConverter.unconvertSet(transactions));
 	}
 
@@ -42,7 +46,7 @@ public class TransactionController {
 	public ResponseEntity<TransactionDto> doTransaction(@PathVariable String uuid,
 			@Valid @RequestBody DoTransactionDto dto) {
 		Account accountFrom = accountService.find(uuid);
-		Transaction transferTransaction = accountService.transfer(dto.getAmount(), accountFrom,
+		Transaction transferTransaction = transactionService.transfer(dto.getAmount(), accountFrom,
 				dto.getAliasToTransfer());
 		return ResponseEntity.ok(transactionConverter.unconvert(transferTransaction));
 	}
