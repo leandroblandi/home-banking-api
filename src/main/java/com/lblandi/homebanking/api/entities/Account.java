@@ -1,6 +1,7 @@
 package com.lblandi.homebanking.api.entities;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.lblandi.homebanking.api.enums.CurrencyTypeEnum;
@@ -22,10 +23,12 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -53,8 +56,26 @@ public class Account {
 	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
 	@JoinColumn(name = "account_card_uuid")
 	private Card card;
+	
+	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+	@JoinColumn(name = "account_owner_uuid")
+	private Person owner;
 
 	@OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "account_transaction_uuid")
 	private Set<Transaction> transactions;
+	
+	public void addTransaction(Transaction transaction) {
+		
+		if(transaction == null) {
+			return;
+		}
+		
+		if(transactions == null) {
+			transactions = new HashSet<>();
+		}
+		
+		transactions.add(transaction);
+		transaction.setAccountFrom(this);
+	}
 }
